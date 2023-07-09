@@ -11,26 +11,35 @@ document.addEventListener('DOMContentLoaded', () => {
     const taskPriority = priorityDropdown.value;
 
     if (taskDescription) {
-      const taskItem = document.createElement('li');
-      taskItem.textContent = taskDescription;
+      const taskItem = createTaskItem(taskDescription, taskPriority);
 
-      if (taskPriority === 'high') {
-        taskItem.style.color = 'red';
-      } else if (taskPriority === 'medium') {
-        taskItem.style.color = 'yellow';
-      } else if (taskPriority === 'low') {
-        taskItem.style.color = 'green';
-      }
-
-      const deleteButton = document.createElement('button');
-      deleteButton.textContent = 'Delete';
-      deleteButton.addEventListener('click', () => {
-        taskItem.remove();
-      });
-
-      taskItem.appendChild(deleteButton);
       tasksList.appendChild(taskItem);
       taskInput.value = '';
+    }
+  });
+
+  tasksList.addEventListener('click', (event) => {
+    const taskItem = event.target.closest('li');
+
+    if (event.target.classList.contains('edit-button')) {
+      const taskDescription = taskItem.querySelector('.task-description');
+      const taskInput = document.createElement('input');
+      taskInput.type = 'text';
+      taskInput.value = taskDescription.textContent;
+      taskDescription.textContent = '';
+      taskDescription.appendChild(taskInput);
+      event.target.textContent = 'Save';
+      event.target.classList.remove('edit-button');
+      event.target.classList.add('save-button');
+    } else if (event.target.classList.contains('save-button')) {
+      const taskDescription = taskItem.querySelector('.task-description');
+      const taskInput = taskDescription.querySelector('input');
+      taskDescription.textContent = taskInput.value;
+      event.target.textContent = 'Edit';
+      event.target.classList.remove('save-button');
+      event.target.classList.add('edit-button');
+    } else if (event.target.classList.contains('delete-button')) {
+      taskItem.remove();
     }
   });
 
@@ -57,8 +66,38 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
+  function createTaskItem(description, priority) {
+    const taskItem = document.createElement('li');
+
+    const taskDescription = document.createElement('span');
+    taskDescription.classList.add('task-description');
+    taskDescription.textContent = description;
+
+    if (priority === 'high') {
+      taskDescription.style.color = 'red';
+    } else if (priority === 'medium') {
+      taskDescription.style.color = 'yellow';
+    } else if (priority === 'low') {
+      taskDescription.style.color = 'green';
+    }
+
+    const editButton = document.createElement('button');
+    editButton.textContent = 'Edit';
+    editButton.classList.add('edit-button');
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.classList.add('delete-button');
+
+    taskItem.appendChild(taskDescription);
+    taskItem.appendChild(editButton);
+    taskItem.appendChild(deleteButton);
+
+    return taskItem;
+  }
+
   function getPriorityValue(taskItem) {
-    const prioritySpan = taskItem.querySelector('.priority-span');
+    const prioritySpan = taskItem.querySelector('.task-description');
     if (prioritySpan) {
       return prioritySpan.dataset.priority;
     }
